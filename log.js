@@ -1,29 +1,36 @@
-/*global window:false*/
+/*global window:false,console:false*/
 (function() {
 	"use strict";
 
-	// the URL to the error log (relative or absolute)
+	// when enabled, this does a console.log of the information being sent to the server
+	var debugMode = true;
+
+	// the URL to the error log (relative or absolute is fine)
 	var logErrorURL = "logError.php";
 
 
 	window.onerror = function(msg, url, lineNum) {
-		var postData = {
-			url: url,
-			lineNum: lineNum,
-			stacktrace: printStackTrace()
+		var stackTraceInfo = printStackTrace();
+		var errorInfo = {
+			url:        url,
+			lineNum:    lineNum,
+			stacktrace: stackTraceInfo.stacktrace,
+			browser:    stackTraceInfo.browser
 		};
-		
-		sendRequest(_logErrorURL, confirmResponse, postData);
+
+		logError(logErrorURL, confirmResponse, errorInfo);
 		return false;
 	};
 
-	function confirmResponse() {
-		// nothing to do here, really
+	function confirmResponse(response) {
+		if (debugMode) {
+			console.log("response from server: ", response);
+		}
 	}
 
 	// Modded from quirksmode: http://www.quirksmode.org/js/xmlhttp.html.
 	// this handles the cross-browser XMLHttpRequest.
-	function sendRequest(url, callback, postData) {
+	function logError(url, callback, postData) {
 		var req = createXMLHTTPObject();
 		if (!req) {
 			return;
@@ -46,30 +53,32 @@
 		if (req.readyState == 4) {
 			return;
 		}
+
+		if (debugMode) {
+			console.log("response from server: ", response);
+		}
+
 		req.send(postData);
 	}
 
 
 	function createXMLHTTPObject() {
 		var XMLHttpFactories = [
-			function() { return new XMLHttpRequest(); },
-			function() { return new ActiveXObject("Msxml2.XMLHTTP"); },
-			function() { return new ActiveXObject("Msxml3.XMLHTTP"); },
-			function() { return new ActiveXObject("Microsoft.XMLHTTP"); }
+			function() {
+				return new XMLHttpRequest();
+			}, function() {
+				return new ActiveXObject('Msxml2.XMLHTTP');
+			}, function() {
+				return new ActiveXObject('Msxml3.XMLHTTP');
+			}, function() {
+				return new ActiveXObject('Microsoft.XMLHTTP');
+			}
 		];
-
-		var xmlhttp = false;
-		for (var i=0; i<XMLHttpFactories.length; i++) {
+		for (var i = 0; i < XMLHttpFactories.length; i++) {
 			try {
-				xmlhttp = XMLHttpFactories[i]();
-			}
-			catch (e) {
-				continue;
-			}
-			break;
+				return XMLHttpFactories[i]();
+			} catch (e) { }
 		}
-
-		return xmlhttp;
 	}
 
 
@@ -77,24 +86,33 @@
 	// The following is used to extract the browser-specific stack-trace.
 
 	// Domain Public by Eric Wendelin http://eriwen.com/ (2008)
-	//	 Luke Smith http://lucassmith.name/ (2008)
-	//	 Loic Dachary <loic@dachary.org> (2008)
-	//	 Johan Euphrosine <proppy@aminche.com> (2008)
-	//	 Oyvind Sean Kinsey http://kinsey.no/blog (2010)
-	//	 Victor Homyakov <victor-homyakov@users.sourceforge.net> (2010)
+	//		Luke Smith http://lucassmith.name/ (2008)
+	//		Loic Dachary <loic@dachary.org> (2008)
+	//		Johan Euphrosine <proppy@aminche.com> (2008)
+	//		Oyvind Sean Kinsey http://kinsey.no/blog (2010)
+	//		Victor Homyakov <victor-homyakov@users.sourceforge.net> (2010)
+
+
+	// I (Ben Keen) made a small modification to the following to return
+	// the identified browser as well as the stack trace. This is handy info to log
+	// and best to use the same user-agent detection as is being used for the stack-trace
 
 	/**
 	 * Main function giving a function stack trace with a forced or passed in Error
 	 *
 	 * @cfg {Error} e The error to create a stacktrace from (optional)
 	 * @cfg {Boolean} guess If we should try to resolve the names of anonymous functions
-	 * @return {Array} of Strings with functions, lines, files, and arguments where possible
+	 * @return {Object} of Strings with functions, lines, files, and arguments where possible
 	 */
 	function printStackTrace(options) {
 		options = options || {guess: true};
 		var ex = options.e || null, guess = !!options.guess;
-		var p = new printStackTrace.implementation(), result = p.run(ex);
-		return (guess) ? p.guessAnonymousFunctions(result) : result;
+		var p = new printStackTrace.implementation();
+		var response = p.run(ex);
+		if (guess) {
+			response.stacktrace = p.guessAnonymousFunctions(response.stacktrace);
+		}
+		return response;
 	}
 
 	if (typeof module !== "undefined" && module.exports) {
@@ -113,11 +131,17 @@
 			// examine exception properties w/o debugger
 			//for (var prop in ex) {alert("Ex['" + prop + "']=" + ex[prop]);}
 			mode = mode || this.mode(ex);
+			var stacktrace;
 			if (mode === 'other') {
-				return this.other(arguments.callee);
+				stacktrace = this.other(arguments.callee);
 			} else {
-				return this[mode](ex);
+				stacktrace = this[mode](ex);
 			}
+
+			return {
+				browser: mode,
+				stacktrace: stacktrace
+			};
 		},
 
 		createException: function() {
@@ -209,9 +233,9 @@
 		 */
 		chrome: function(e) {
 			var stack = (e.stack + '\n').replace(/^\S[^\(]+?[\n$]/gm, '').
-			  replace(/^\s+(at eval )?at\s+/gm, '').
-			  replace(/^([^\(]+?)([\n$])/gm, '{anonymous}()@$1$2').
-			  replace(/^Object.<anonymous>\s*\(([^\)]+)\)/gm, '{anonymous}()@$1').split('\n');
+				replace(/^\s+(at eval )?at\s+/gm, '').
+				replace(/^([^\(]+?)([\n$])/gm, '{anonymous}()@$1$2').
+				replace(/^Object.<anonymous>\s*\(([^\)]+)\)/gm, '{anonymous}()@$1').split('\n');
 			stack.pop();
 			return stack;
 		},
