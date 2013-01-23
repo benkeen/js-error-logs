@@ -2,11 +2,16 @@
 (function() {
 	"use strict";
 
-	// when enabled, this does a console.log of the information being sent to the server
-	var debugMode = true;
+	// --------------------------------------------------------------------------------------------
+	// CONFIGURABLE SETTINGS
 
-	// the URL to the error log (relative or absolute is fine)
-	var logErrorURL = "logError.php";
+	// when enabled, this does a console.log of the information being sent to the server
+	var debugMode = false;
+
+	// the URL to your choice of error log (relative or absolute is fine)
+	var logErrorURL = "../server/php-mysql/logError.php";
+
+	// --------------------------------------------------------------------------------------------
 
 
 	window.onerror = function(msg, url, lineNum) {
@@ -14,10 +19,9 @@
 		var errorInfo = {
 			url:        url,
 			lineNum:    lineNum,
-			stacktrace: stackTraceInfo.stacktrace,
+			stackTrace: stackTraceInfo.stackTrace,
 			browser:    stackTraceInfo.browser
 		};
-
 		logError(logErrorURL, confirmResponse, errorInfo);
 		return false;
 	};
@@ -35,8 +39,7 @@
 		if (!req) {
 			return;
 		}
-		var method = (postData) ? "POST" : "GET";
-		req.open(method, url, true);
+		req.open("POST", url, true);
 		req.setRequestHeader('User-Agent', 'XMLHTTP/1.0');
 		if (postData) {
 			req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
@@ -53,12 +56,13 @@
 		if (req.readyState == 4) {
 			return;
 		}
-
-		if (debugMode) {
-			console.log("response from server: ", response);
+		
+		var postDataPairs = [];
+		for (var i in postData) {
+			postDataPairs.push(i + "=" + encodeURIComponent(postData[i]));
 		}
-
-		req.send(postData);
+		var postDataPairsStr = postDataPairs.join("&");
+		req.send(postDataPairsStr);
 	}
 
 
@@ -74,7 +78,7 @@
 				return new ActiveXObject('Microsoft.XMLHTTP');
 			}
 		];
-		for (var i = 0; i < XMLHttpFactories.length; i++) {
+		for (var i=0; i<XMLHttpFactories.length; i++) {
 			try {
 				return XMLHttpFactories[i]();
 			} catch (e) { }
@@ -110,7 +114,7 @@
 		var p = new printStackTrace.implementation();
 		var response = p.run(ex);
 		if (guess) {
-			response.stacktrace = p.guessAnonymousFunctions(response.stacktrace);
+			response.stackTrace = p.guessAnonymousFunctions(response.stackTrace);
 		}
 		return response;
 	}
@@ -128,19 +132,20 @@
 		 */
 		run: function(ex, mode) {
 			ex = ex || this.createException();
+
 			// examine exception properties w/o debugger
 			//for (var prop in ex) {alert("Ex['" + prop + "']=" + ex[prop]);}
 			mode = mode || this.mode(ex);
-			var stacktrace;
+			var stackTrace;
 			if (mode === 'other') {
-				stacktrace = this.other(arguments.callee);
+				stackTrace = this.other(arguments.callee);
 			} else {
-				stacktrace = this[mode](ex);
+				stackTrace = this[mode](ex);
 			}
 
 			return {
 				browser: mode,
-				stacktrace: stacktrace
+				stackTrace: stackTrace
 			};
 		},
 
