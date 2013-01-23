@@ -3,9 +3,38 @@
 <head>
 	<title>Error tests</title>
 	<script src="../log.js"></script>
+
+	<!-- for styling the error page -->
+	<style type="text/css">
+	body {
+		font-family: lucida grande;
+	}
+	</style>
+	<script>
+	function myErrorFunc() {
+		"use strict";
+		var one = 1;
+		two = "two";
+	}
+	</script>
 </head>
 <body>
 
-<input type="button" value="Click me" onclick="asdasda" />
+<h1>Tests</h1>
+
+<p>
+	<input type="button" value="Run test #1" onclick="asdasda" />
+	Inline onclick handler with invalid JS.
+</p>
+
+<p>
+	<input type="button" value="Run test #2" onclick="myErrorFunc()" />
+	Function with strict mode error.
+</p>
+
+<p>
+	<i>Feel free to expand!</i>
+</p>
+
 </body>
 </html>

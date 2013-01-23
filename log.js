@@ -9,7 +9,7 @@
 	var debugMode = false;
 
 	// the URL to your choice of error log (relative or absolute is fine)
-	var logErrorURL = "../server/php-mysql/logError.php";
+	var logErrorURL = "../server/php-flatfile/logError.php";
 
 	// --------------------------------------------------------------------------------------------
 
@@ -99,7 +99,7 @@
 
 	// I (Ben Keen) made a small modification to the following to return
 	// the identified browser as well as the stack trace. This is handy info to log
-	// and best to use the same user-agent detection as is being used for the stack-trace
+	// and best to use the same user-agent detection as is being used for the stack-trace.
 
 	/**
 	 * Main function giving a function stack trace with a forced or passed in Error

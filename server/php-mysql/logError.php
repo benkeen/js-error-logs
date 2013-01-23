@@ -1,11 +1,11 @@
 <?php
 
 // need to be filled in!
-$dbHostname = "localhost";
-$dbDbName   = "jserrorlogs";
+$dbHostname = "";
+$dbDbName   = "";
 $dbTable    = "js_errors";
-$dbUsername = "root";
-$dbPassword = "root";
+$dbUsername = "";
+$dbPassword = "";
 
 if (!isset($_POST)) {
 	return;
