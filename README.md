@@ -11,8 +11,8 @@ and applications that otherwise would go missed.
 The JS error logger has three parts:
 
 1. **log.js** - a standalone JS script that captures the error and submits the data via Ajax to...
-2. **/server/** - a nnumber of server-side scripts you can use to log the information. You only need to pick one. I've 
-provided three simple PHP scripts that handle the error in slightly different ways: store them in a MySQL Database table, log them 
+2. **/server/** - a number of server-side scripts to store the errors. You only need to pick one. I've provided three 
+simple PHP scripts that handle the error in slightly different ways: store them in a MySQL Database table, log them 
 using PHP's own error_log function and log them in a custom log file. But this list can be expanded to add server-side tracking in 
 whatever language you want. *Fork away!* Each server-side logger folder contains a separate README providing a little more 
 info.
