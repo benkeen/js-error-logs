@@ -21,9 +21,11 @@ much empty...*
 
 
 ### The errors
-A few comments about the errors themselves.
+A coupe of comments about the errors themselves.
+
 1. Each browser throws a very different-looking stacktrace, so don't expect consistency on that front.
-2. When testing on IE 8, it appears that the browser gets logged as "other" instead of "ie".
+2. When testing on IE 8, it appears that the browser gets logged as "other" instead of "ie". I'm not sure if this applies
+to other IE versions yet.
 
 
 ### How to install
