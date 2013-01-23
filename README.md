@@ -33,7 +33,7 @@ A few comments about the errors themselves.
 
 
 ### Scripts used
-Thanks to the following scripts:
+A big thanks to the developers of the following scripts:
 * Cross-browser XMLHttpRequest object: http://www.quirksmode.org/js/xmlhttp.html
 * Stack trace generation script: https://github.com/eriwen/javascript-stacktrace
 
